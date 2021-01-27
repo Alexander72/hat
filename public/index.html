@@ -112,11 +112,11 @@
             }
             var data = sendMessage.value;
             socket.send(data);
-            commsLog.innerHTML = '<tr>' +
+            /*commsLog.innerHTML = '<tr>' +
                 '<td class="commslog-client">Client</td>' +
                 '<td class="commslog-server">Server</td>' +
                 '<td class="commslog-data">' + htmlEscape(data) + '</td></tr>' +
-                commsLog.innerHTML;
+                commsLog.innerHTML;*/
         };
 
         connectButton.onclick = function() {
