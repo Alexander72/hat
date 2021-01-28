@@ -1,21 +1,24 @@
 const express = require('express')
 const app = express()
-const enableWs = require('express-ws')(app)
+const GameMessageHandler = require('./app/Handlers/GameMessageHandler.js');
+
+require('express-ws')(app)
 
 app.use(express.static('public'));
-let sockets = [];
 
-app.ws('/ws', (ws, req) => {
-	sockets[req.ip] = ws;
+app.post('/game', (req, res) => {
+
+})
+
+app.ws('/ws/game/:gameId', (ws, req) => {
+	let messageHandler = new GameMessageHandler(req, ws);
     ws.on('message', msg => {
-    	console.log(req.headers);
-    	console.log(req.ip);
-    	console.log(req.connection.remoteAddress);
-    	for (let ip in sockets) {
-    		if (req.ip != ip) {
-				sockets[ip].send(msg);
-			}
-    	}
+		console.log('Message received');
+    	try {
+			messageHandler.handle(msg);
+		} catch (e) {
+			ws.send(e.toString());
+		}
     })
 
     ws.on('close', () => {
