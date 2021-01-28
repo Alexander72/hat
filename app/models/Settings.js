@@ -4,7 +4,7 @@ class Settings {
     playersCount = 4;
     wordsPerPlayer = 2;
     roundsCount = 3;
-    explanationDurationInSeconds = 30;
+    turnDurationInSeconds = 5;
 
     getMinPlayersCount() {
         return MIN_PLAYERS_COUNT;
@@ -20,7 +20,7 @@ class Settings {
         return this.roundsCount
     }
     get explanationDurationInSeconds() {
-        return this.explanationDurationInSeconds
+        return this.turnDurationInSeconds
     }
 
     set wordsPerPlayer(wordsPerPlayer) {
@@ -30,7 +30,7 @@ class Settings {
         return this.roundsCoun = roundsCount
     }
     set explanationDurationInSeconds(explanationDurationInSeconds) {
-        return this.explanationDurationInSeconds = explanationDurationInSeconds
+        return this.turnDurationInSeconds = explanationDurationInSeconds
     }
     set playersCount(playersCount) {
         if (playersCount < this.getMinPlayersCount()) {

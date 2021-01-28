@@ -1,6 +1,7 @@
 class Player {
     id;
     name;
+    sockets = [];
 
     constructor(id, name) {
         this.id = id;
