@@ -57,6 +57,10 @@ class Game extends EventEmitter {
         this.emit(WORD_ADDED, word, this);
     }
 
+    getPlayerById(playerId) {
+        return this.players.find(player => player.id === playerId);
+    }
+
     addPlayer(player) {
         this.checkState(INITIALIZATION, 'Unable to add player because state is not initialisation but ' + this.state);
 

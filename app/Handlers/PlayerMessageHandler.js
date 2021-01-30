@@ -16,7 +16,9 @@ class PlayerMessageHandler {
         this.gameNotificator = gameNotificator;
 
         this.game = gameRepository.getGameById(req.params.gameId);
-        this.player = this.getPlayer(req);
+        this.player = this.findMatchedPlayer(this.game, req, ws);
+
+        // pass proper arguments
         this.gameNotificator.subscribe(this.game);
     }
 
@@ -25,7 +27,7 @@ class PlayerMessageHandler {
 
         switch (message.type) {
             case "get_game":
-                ws.send(JSON.stringify(this.game));
+                this.ws.send(JSON.stringify(this.game));
 
             case "add_player":
                 this.game.addPlayer(this.player);
@@ -64,25 +66,22 @@ class PlayerMessageHandler {
     }
 
     disconnected() {
-        // remove ws from notificator
-    }
-
-    validateAndGetMessage(rawMessage) {
-        const message = JSON.parse(rawMessage);
-
-        if (!message.hasOwnProperty('type')) {
-            this.throwError(new ErrorMessage(ErrorMessage.MISSED_PROPERTY, "Property 'type' is missed"));
-        }
-        return message;
+        // pass proper arguments
+        this.gameNotificator.unsubscribe(this.game);
     }
 
     throwError(errorMessage) {
         throw new Error(JSON.stringify(errorMessage));
     }
 
-    getPlayer(req) {
+    findMatchedPlayer(game, req, ws) {
         if (!this.player) {
-            this.player = new Player(req.headers['Player-Id']);
+            if (!req.headers['Player-Id']) {
+                this.throwError('Unable to authenticate player. Provide Player-Id header.');
+            }
+            const player = game.getPlayerById(req.headers['Player-Id']);
+            this.player = player ? player : new Player(req.headers['Player-Id']);
+            this.player.sockets.push(ws);
         }
 
         return this.player;
