@@ -65,7 +65,7 @@ class PlayerMessageHandler {
         return message;
     }
 
-    disconnected() {
+    disconnect() {
         // pass proper arguments
         this.gameNotificator.unsubscribe(this.game);
     }

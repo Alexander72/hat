@@ -2,7 +2,7 @@ class GameRepository {
     games = [];
 
     createGame(game) {
-        const id = Math.round(Math.random() * 100000);
+        const id = Math.random().toString(36).substring(2, 12);
         game.id = id;
         this.games[id] = game;
 
