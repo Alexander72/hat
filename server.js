@@ -1,31 +1,36 @@
 const express = require('express')
 const app = express()
 
-const GameMessageHandler = require('./app/Handlers/GameMessageHandler.js');
+const PlayerMessageHandler = require('./app/Handlers/PlayerMessageHandler.js');
 const GameRepository = require('./app/Repositories/GameRepository.js');
+const GameNotificator = require('./app/Services/GameNotificator.js');
 
+// Singletons
 const gameRepository = new GameRepository();
+const gameNotificator = new GameNotificator();
 
+// Setup Application
 require('express-ws')(app)
-
 app.use(express.static('public'));
 
+// Routes
 app.post('/game', (req, res) => {
 
 })
 
+// WebSocket routes
 app.ws('/ws/game/:gameId', (ws, req) => {
-	const messageHandler = new GameMessageHandler(req, ws, gameRepository);
+	const playerMessageHandler = new PlayerMessageHandler(req, ws, gameRepository,gameNotificator);
     ws.on('message', msg => {
     	try {
-			messageHandler.handle(msg);
+			playerMessageHandler.handle(msg);
 		} catch (e) {
 			ws.send(e.toString());
 		}
     })
 
     ws.on('close', () => {
-		messageHandler.disconnected();
+		playerMessageHandler.disconnected();
     })
 })
 

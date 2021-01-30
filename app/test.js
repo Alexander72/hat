@@ -8,6 +8,9 @@ function sleep(ms) {
 
 (async function() {
     let settings = new Settings();
+    settings.wordsPerPlayer = 1;
+    settings.playersCount = 4;
+
     let game = new Game('test game', settings);
 
     game.addPlayer(new Player(1, 'Test 1'));
@@ -17,31 +20,27 @@ function sleep(ms) {
 
     game.addWords(['cow', 'dog', 'sun', 'rat']);
 
-    game.start();
-
     game.startTurn();
 
-    let wordForExplanation;
-
-    await sleep(2 * 1000);
+    await sleep(2 * 100);
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
-    await sleep(2 * 1000);
+    await sleep(2 * 100);
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
-    await sleep(2 * 1000);
+    await sleep(2 * 100);
 
     console.log('Expected turn time is up. Starting new turn..');
 
     game.startTurn();
 
-    await sleep(2 * 1000);
+    await sleep(2 * 100);
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
-    await sleep(2 * 1000);
+    await sleep(2 * 100);
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
@@ -49,15 +48,16 @@ function sleep(ms) {
 
     game.startTurn();
 
-    await sleep(2 * 1000);
+    await sleep(2 * 100);
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
-    await sleep(2 * 1000);
+    await sleep(2 * 100);
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
-    await sleep(2 * 1000);
+    await sleep(2 * 100);
 
-    console.log(require('util').inspect(game, {showHidden: false, depth: null}))
+    //console.log(require('util').inspect(game, {showHidden: false, depth: null}))
+    console.log(JSON.stringify(game))
 })();

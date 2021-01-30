@@ -1,9 +1,24 @@
+const EventEmitter = require('events');
+
+// states
 const INITIALIZATION = 'initialization';
 const READY_FOR_EXPLANATION = 'in_progress';
 const EXPLANATION = 'explanation';
 const FINISHED = 'finished';
 
-class Game {
+// events
+const PLAYER_ADDED = 'player_added';
+const PLAYER_UPDATED = 'player_updated';
+const WORD_ADDED = 'word_added';
+const GAME_STARTED = 'game_started';
+const TURN_STARTED = 'turn_started';
+const TURN_TIME_IS_UP = 'turn_time_is_up';
+const NEXT_TURN_REWINDED = 'next_turn_rewinded';
+const WORD_EXPLAINED = 'word_explained';
+const GAME_IS_OVER = 'game_is_over';
+const NEW_ROUND_STARTED = 'new_round_started';
+
+class Game extends EventEmitter {
     id;
     title;
     players = [];
@@ -16,9 +31,13 @@ class Game {
     roundWords = [];
     turnTimerId;
 
-    constructor(title, settings) {
+    constructor(title, settings, emitterOptions) {
+        super(emitterOptions);
+
         this.title = title;
         this.settings = settings;
+
+        this.registerListeners();
     }
 
     addWords(words) {
@@ -33,22 +52,30 @@ class Game {
 
     addWord(word) {
         this.checkState(INITIALIZATION, 'Unable to add word because state is not initialisation but ' + this.state);
+
         this.words.push(word);
+        this.emit(WORD_ADDED, word, this);
     }
 
     addPlayer(player) {
         this.checkState(INITIALIZATION, 'Unable to add player because state is not initialisation but ' + this.state);
-        this.players.push(player);
+
+        if (this.hasPlayer(player)) {
+            this.updatePlayer(player);
+        } else {
+            this.players.push(player);
+            this.emit(PLAYER_ADDED, player, this);
+        }
     }
 
     start() {
         this.checkState(INITIALIZATION, 'Unable to start game because state is not initialisation but ' + this.state)
 
         this.generateTeams();
-
+        this.resetWordsForNewRound();
         this.state = READY_FOR_EXPLANATION;
 
-        this.resetWordsForNewRound();
+        this.emit(GAME_STARTED, this);
     }
 
     startTurn() {
@@ -59,14 +86,16 @@ class Game {
         let game = this;
         this.turnTimerId = setTimeout(function() {
             game.timeIsUp();
-        }, this.settings.turnDurationInSeconds * 1000);
+        }, this.settings.turnDurationInMilliseconds);
 
-        console.log('Turn was started.');
+        this.emit(TURN_STARTED, this);
     }
 
     timeIsUp() {
         this.checkState(EXPLANATION, 'State inconsistency. Trying to do things after time is up but the state is not ' + READY_FOR_EXPLANATION + ' but ' + this.state);
-        console.log('Turn time is up!');
+
+        this.emit(TURN_TIME_IS_UP, this);
+
         this.state = READY_FOR_EXPLANATION;
         this.nextTurn();
     }
@@ -76,6 +105,7 @@ class Game {
         this.stopTimer();
         this.rewindNextExplainerInTheTeam(this.getCurrentTeam());
         this.rewindNextTeam();
+        this.emit(NEXT_TURN_REWINDED, this);
     }
 
     getExplainer() {
@@ -98,8 +128,11 @@ class Game {
 
     currentWordExplained() {
         this.checkState(EXPLANATION, 'Incorrect state to commit explained word: ' + this.state);
+
+        const wordForExplanation = this.getWordForExplanation();
         this.roundWords.shift();
         this.getCurrentTeam().score[this.currentRoundIndex]++;
+        this.emit(WORD_EXPLAINED, wordForExplanation);
 
         if (this.roundWords.length === 0) {
             this.nextRound();
@@ -137,8 +170,6 @@ class Game {
     }
 
     nextRound() {
-        console.log('New round started.');
-
         this.stopTimer();
         this.state = READY_FOR_EXPLANATION;
 
@@ -148,11 +179,13 @@ class Game {
             this.currentRoundIndex++;
             this.rewindNextTeam();
             this.resetWordsForNewRound();
+            this.emit(NEW_ROUND_STARTED, this);
         }
     }
 
     finalize() {
         this.state = FINISHED;
+        this.emit(GAME_IS_OVER, this);
     }
 
     getCurrentTeam() {
@@ -172,6 +205,7 @@ class Game {
     stopTimer() {
         if (this.turnTimerId) {
             clearTimeout(this.turnTimerId);
+            this.turnTimerId = null;
         }
     }
 
@@ -183,6 +217,33 @@ class Game {
         if (states.indexOf(this.state) === -1) {
             throw new Error(errorMessage ? errorMessage : 'State expected: \'' + state + '\'');
         }
+    }
+
+    hasPlayer(player) {
+        return this.players.filter((oneOfThePlayers) => {
+            return oneOfThePlayers.id === player.id;
+        }).length >= 1;
+    }
+
+    updatePlayer(player) {
+        this.players = this.players.map((oneOfThePlayers) => {
+            return oneOfThePlayers.id === player.id ? player : oneOfThePlayers;
+        });
+        this.emit(PLAYER_UPDATED, player, this);
+    }
+
+    registerListeners() {
+        const checkStartConditionsAndStartIfMet = () => {
+            if (
+                this.words.length >= this.settings.getTotalWordsCount() &&
+                this.players.length >= this.settings.playersCount
+            ) {
+                this.start();
+            }
+        };
+
+        this.on(WORD_ADDED, checkStartConditionsAndStartIfMet)
+        this.on(PLAYER_ADDED, checkStartConditionsAndStartIfMet)
     }
 }
 

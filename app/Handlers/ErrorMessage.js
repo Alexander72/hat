@@ -1,4 +1,5 @@
 const MISSED_PROPERTY = 'missed_property';
+const ACCESS_VIOLATION = 'access_violation';
 
 class ErrorMessage {
     type = 'error';
@@ -13,3 +14,4 @@ class ErrorMessage {
 
 module.exports = ErrorMessage;
 module.exports.MISSED_PROPERTY = MISSED_PROPERTY;
+module.exports.ACCESS_VIOLATION = ACCESS_VIOLATION;

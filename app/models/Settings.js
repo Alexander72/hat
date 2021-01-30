@@ -4,23 +4,14 @@ class Settings {
     playersCount = 4;
     wordsPerPlayer = 2;
     roundsCount = 3;
-    turnDurationInSeconds = 5;
+    turnDurationInMilliseconds = 5 * 100;
 
     getMinPlayersCount() {
         return MIN_PLAYERS_COUNT;
     }
 
-    get playersCount() {
-        return this.playersCount
-    }
-    get wordsPerPlayer() {
-        return this.wordsPerPlayer
-    }   
-    get roundsCount() {
-        return this.roundsCount
-    }
-    get explanationDurationInSeconds() {
-        return this.turnDurationInSeconds
+    getTotalWordsCount() {
+        return this.playersCount * this.wordsPerPlayer;
     }
 
     set wordsPerPlayer(wordsPerPlayer) {
@@ -29,12 +20,12 @@ class Settings {
     set roundsCount(roundsCount) {
         return this.roundsCoun = roundsCount
     }
-    set explanationDurationInSeconds(explanationDurationInSeconds) {
-        return this.turnDurationInSeconds = explanationDurationInSeconds
+    set explanationDurationInMilliseconds(turnDurationInMilliseconds) {
+        return this.turnDurationInMilliseconds = turnDurationInMilliseconds
     }
     set playersCount(playersCount) {
         if (playersCount < this.getMinPlayersCount()) {
-            throw new Error('Incorrect players')
+            throw new Error('Incorrect players count')
         }
 
         this.playersCount = playersCount;
