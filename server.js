@@ -1,6 +1,10 @@
 const express = require('express')
 const app = express()
+
 const GameMessageHandler = require('./app/Handlers/GameMessageHandler.js');
+const GameRepository = require('./app/Repositories/GameRepository.js');
+
+const gameRepository = new GameRepository();
 
 require('express-ws')(app)
 
@@ -11,9 +15,8 @@ app.post('/game', (req, res) => {
 })
 
 app.ws('/ws/game/:gameId', (ws, req) => {
-	let messageHandler = new GameMessageHandler(req, ws);
+	const messageHandler = new GameMessageHandler(req, ws, gameRepository);
     ws.on('message', msg => {
-		console.log('Message received');
     	try {
 			messageHandler.handle(msg);
 		} catch (e) {
@@ -22,7 +25,7 @@ app.ws('/ws/game/:gameId', (ws, req) => {
     })
 
     ws.on('close', () => {
-        console.log('WebSocket was closed')
+		messageHandler.disconnected();
     })
 })
 
