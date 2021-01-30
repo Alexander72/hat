@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Create game</title>
+
+    <link rel="stylesheet" href="/resources/bootstrap-4.6.0-dist/css/bootstrap.min.css" />
+    <style>
+        .form-background {
+            background: #acbfd7;
+            padding: 20px;
+        }
+    </style>
+    <script src="/resources/jquery/jquery-3.5.1.min.js" ></script>
+    <script src="/resources/bootstrap-4.6.0-dist/js/bootstrap.bundle.min.js" ></script>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-md-center form-background">
+            <form method="post" class="col col-10">
+                <div class="form-group">
+                    <label for="title">Game title</label>
+                    <input name="title" type="text" class="form-control" id="title">
+                </div>
+                <div class="form-group">
+                    <label for="playersCount">Players count</label>
+                    <input name="playersCount" type="number" class="form-control" id="playersCount" value="4">
+                </div>
+                <div class="form-group">
+                    <label for="wordsPerPlayer">Words per player</label>
+                    <input name="wordsPerPlayer" type="number" class="form-control" id="wordsPerPlayer" value="4">
+                </div>
+                <div class="form-group">
+                    <label for="turnDurationInSeconds">Turn duration</label>
+                    <input name="turnDurationInSeconds" type="number" class="form-control" id="turnDurationInSeconds" value="30">
+                </div>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
