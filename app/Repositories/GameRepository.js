@@ -1,12 +1,14 @@
+const Game = require("../models/Game");
+const Settings = require("../models/Settings");
+
 class GameRepository {
     games = [];
+    mongoDB;
 
     createGame(game) {
-        const id = Math.random().toString(36).substring(2, 12);
-        game.id = id;
-        this.games[id] = game;
-
-        return id;
+        game.id = Math.random().toString(36).substring(2, 12);
+        this.games[game.id] = game;
+        this.mongoDB.collection('games').insertOne(game.getData());
     }
 
     updateGame(game) {
@@ -25,7 +27,16 @@ class GameRepository {
             return this.games[gameId];
         }
 
-        throw new Error(`Game with id '${gameId}' not found.`);
+        const gameData = this.mongoDB.collection('games').findOne({id: gameId});
+
+        if (!gameData) {
+            throw new Error(`Game with id '${gameId}' not found.`);
+        }
+
+        // todo fill all the data
+        this.games[gameId] = new Game(gameData.title, Object.assign(new Settings(), gameData.settings));
+
+        return this.games[gameId];
     }
 }
 

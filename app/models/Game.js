@@ -40,6 +40,16 @@ class Game extends EventEmitter {
         this.registerListeners();
     }
 
+    getData() {
+        let gameData = {...this};
+        delete gameData._events;
+        delete gameData._eventsCount;
+        delete gameData._maxListeners;
+        delete gameData.turnTimerId;
+
+        return gameData;
+    }
+
     addWords(words) {
         if (!Array.isArray(words)) {
             throw new Error('words variable is not array, unable to add. ' + words);
