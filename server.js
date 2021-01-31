@@ -35,7 +35,7 @@ app.post('/create-game', (req, res) => {
 })
 
 app.get('/game/:gameId', (req, res) => {
-	(new GetGamePageHandler()).handle(req, res);
+	(new GetGamePageHandler(gameRepository)).handle(req, res);
 })
 
 // WebSocket routes
