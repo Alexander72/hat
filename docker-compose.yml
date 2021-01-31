@@ -1,0 +1,28 @@
+version: '3.5'
+
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - ./:/var/www/html
+    command: npm run dev
+    depends_on:
+      - redis
+      - mongodb
+    ports:
+      - "3000:3000"
+
+  mongodb:
+    image: mongo
+    ports:
+    - 27017:27017
+    volumes:
+    - mongo:/data/db
+
+  redis:
+    image: redis
+
+volumes:
+  mongo:
