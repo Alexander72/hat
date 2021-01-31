@@ -14,7 +14,7 @@ class CreateGameHandler {
         settings.wordsPerPlayer = req.body.wordsPerPlayer;
         settings.turnDurationInMilliseconds = req.body.turnDurationInSeconds * 1000;
 
-        const game = new Game(req.body.title,);
+        const game = new Game(req.body.title, settings);
         this.gameRepository.createGame(game, settings);
 
         res.redirect(`/game/${game.id}`);

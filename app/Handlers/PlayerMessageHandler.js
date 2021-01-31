@@ -30,18 +30,23 @@ class PlayerMessageHandler {
                 this.ws.send(JSON.stringify(this.game));
 
             case "add_player":
+                // do smth about player name
                 this.game.addPlayer(this.player);
+                break;
 
             case "add_player_words":
                 this.game.addWords(message.words, this.player);
+                break;
 
             case "explainer_is_ready_to_explain":
                 this.checkCurrentPlayerIsExplainer("Trying to tell that explainer is ready to explain, however you are not explainer");
                 this.game.startTurn();
+                break;
 
             case "word_explained":
                 this.checkCurrentPlayerIsExplainer("Trying to tell that word was explained, however you are not explainer");
                 this.game.currentWordExplained();
+                break;
 
             default:
                 this.throwError(`Incorrect message type: ${message.type}`);
@@ -76,11 +81,11 @@ class PlayerMessageHandler {
 
     findMatchedPlayer(game, req, ws) {
         if (!this.player) {
-            if (!req.headers['Player-Id']) {
+            if (!req.session['Player-Id']) {
                 this.throwError('Unable to authenticate player. Provide Player-Id header.');
             }
-            const player = game.getPlayerById(req.headers['Player-Id']);
-            this.player = player ? player : new Player(req.headers['Player-Id']);
+            const player = game.getPlayerById(req.session['Player-Id']);
+            this.player = player ? player : new Player(req.session['Player-Id']);
             this.player.sockets.push(ws);
         }
 

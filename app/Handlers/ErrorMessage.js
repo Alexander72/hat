@@ -2,7 +2,7 @@ const MISSED_PROPERTY = 'missed_property';
 const ACCESS_VIOLATION = 'access_violation';
 
 class ErrorMessage {
-    type = 'error';
+    status = 'error';
     reason;
     description;
 
