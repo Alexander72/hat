@@ -1,6 +1,6 @@
 class GameNotificator {
-    subscribe() {
-
+    subscribe(game) {
+        game.on()
     }
     unsubscribe() {
 
