@@ -30,11 +30,12 @@ class PlayerMessageHandler {
                 this.ws.send(JSON.stringify(this.game));
 
             case "add_player":
-                // do smth about player name
+                this.player.name = message.name;
                 this.game.addPlayer(this.player);
                 break;
 
             case "add_player_words":
+                //todo check if current player has already added words
                 this.game.addWords(message.words, this.player);
                 break;
 
