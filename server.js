@@ -1,5 +1,8 @@
-const CookieSession = require('cookie-session');
+const dotenv = require('dotenv')
 const express = require('express')
+const MongoClient = require('mongodb').MongoClient;
+const session = require('express-session');
+const MongoStore = require('connect-mongo')(session);
 const app = express()
 
 const CreateGameHandler = require('./app/Handlers/CreateGameHandler.js');
@@ -16,13 +19,14 @@ const gameRepository = new GameRepository();
 const gameNotificator = new GameNotificator();
 
 // Setup Application
+dotenv.config();
 require('express-ws')(app)
+app.set('trust proxy', 1)
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }))
-app.set('trust proxy', 1)
-app.use(CookieSession({
-	name: 'session',
-	keys: ['kdm^3c8jdDFJ#8dF', 'jPRw4JS^3eDJ3', 'j3Dne6RnV@kdc]Zmv3']
+app.use(session({
+	secret: process.env.APP_KEY,
+	store: new MongoStore({ url: process.env.MONGODB_URL })
 }));
 
 // Routes
@@ -62,4 +66,21 @@ app.ws('/ws/game/:gameId', (ws, req) => {
 	}
 })
 
-app.listen(3000)
+let dbClient;
+MongoClient.connect(process.env.MONGODB_URL, function(err, db) {
+	if (err) {
+		return console.log(err);
+	}
+
+	dbClient = db;
+	app.locals.mongoDB = db;
+	gameRepository.mongoDB = db.db();
+
+	app.listen(3000, function(){
+		console.log("Express is ready to handle connections...");
+	});
+});
+process.on("SIGINT", () => {
+	dbClient.close();
+	process.exit();
+});
