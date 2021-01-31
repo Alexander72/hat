@@ -1,3 +1,4 @@
+const CookieSession = require('cookie-session');
 const express = require('express')
 const app = express()
 
@@ -18,6 +19,11 @@ const gameNotificator = new GameNotificator();
 require('express-ws')(app)
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }))
+app.set('trust proxy', 1)
+app.use(CookieSession({
+	name: 'session',
+	keys: ['kdm^3c8jdDFJ#8dF', 'jPRw4JS^3eDJ3', 'j3Dne6RnV@kdc]Zmv3']
+}));
 
 // Routes
 app.get('/create-game', (req, res) => {
@@ -42,7 +48,7 @@ app.ws('/ws/game/:gameId', (ws, req) => {
 			try {
 				playerMessageHandler.handle(msg);
 			} catch (e) {
-				ws.send(e.toString());
+				ws.send(e.toString() + e.stack);
 			}
 		})
 
@@ -50,7 +56,9 @@ app.ws('/ws/game/:gameId', (ws, req) => {
 			playerMessageHandler.disconnect();
 		})
 	} catch (e) {
-		console.error(e);
+		ws.on('message', msg => {
+			ws.send(e.toString());
+		});
 	}
 })
 
