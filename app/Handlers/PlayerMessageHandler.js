@@ -1,5 +1,5 @@
 const ErrorMessage = require('./ErrorMessage.js');
-const Player = require('../models/Player.js');
+const Player = require('../Models/Player.js');
 
 class PlayerMessageHandler {
     req;
@@ -28,6 +28,7 @@ class PlayerMessageHandler {
         switch (message.type) {
             case "get_game":
                 this.ws.send(JSON.stringify(this.game));
+                break;
 
             case "add_player":
                 this.player.name = message.name;

@@ -1,5 +1,5 @@
-const Game = require("../models/Game");
-const Settings = require("../models/Settings");
+const Game = require("../Models/Game");
+const Settings = require("../Models/Settings");
 
 class GameRepository {
     games = [];
