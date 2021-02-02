@@ -17,8 +17,9 @@ class Timer extends EventEmitter {
     start() {
         let self = this;
         this.internalTimerId = setInterval(function () {
+            self.emit('tick', this);
             if (self.millisecondsLeft() === 0) {
-                self.emit('time_is_up');
+                self.emit('time_is_up', this);
                 self.stop();
             }
         }, 100);
