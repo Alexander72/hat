@@ -1,6 +1,6 @@
-const Game = require('./models/Game.js');
-const Player = require('./models/Player.js');
-const Settings = require('./models/Settings.js');
+const Game = require('./Models/Game.js');
+const Player = require('./Models/Player.js');
+const Settings = require('./Models/Settings.js');
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -22,7 +22,7 @@ function sleep(ms) {
 
     game.startTurn();
 
-    await sleep(2 * 100);
+    await sleep(5 * 100);
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
@@ -30,7 +30,7 @@ function sleep(ms) {
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
-    await sleep(2 * 100);
+    await sleep(4 * 100);
 
     console.log('Expected turn time is up. Starting new turn..');
 
@@ -56,7 +56,7 @@ function sleep(ms) {
     console.log(game.getExplainer().name + ' explained word \'' + game.getWordForExplanation() + '\' to ' + game.getGuessers().map(guesser => guesser.name).join(', '));
     game.currentWordExplained();
 
-    await sleep(2 * 100);
+    await sleep(8 * 100);
 
     //console.log(require('util').inspect(game, {showHidden: false, depth: null}))
     console.log(JSON.stringify(game))

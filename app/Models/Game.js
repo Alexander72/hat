@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const Timer = require('./Timer');
 
 // states
 const INITIALIZATION = 'initialization';
@@ -29,7 +30,7 @@ class Game extends EventEmitter {
     currentTeamIndex = 0;
     currentRoundIndex = 0;
     roundWords = [];
-    turnTimerId;
+    turnTimer;
 
     constructor(title, settings, emitterOptions) {
         super(emitterOptions);
@@ -45,7 +46,7 @@ class Game extends EventEmitter {
         delete gameData._events;
         delete gameData._eventsCount;
         delete gameData._maxListeners;
-        delete gameData.turnTimerId;
+        delete gameData.turnTimer;
 
         return gameData;
     }
@@ -96,20 +97,14 @@ class Game extends EventEmitter {
         this.checkState(READY_FOR_EXPLANATION, 'Unable to start turn because state is not in_progress but ' + this.state);
 
         this.state = EXPLANATION;
-
-        let game = this;
-        this.turnTimerId = setTimeout(function() {
-            game.timeIsUp();
-        }, this.settings.turnDurationInMilliseconds);
-
+        this.startTurnTimer();
         this.emit(TURN_STARTED, this);
     }
 
     timeIsUp() {
-        this.checkState(EXPLANATION, 'State inconsistency. Trying to do things after time is up but the state is not ' + READY_FOR_EXPLANATION + ' but ' + this.state);
+        this.checkState(EXPLANATION, 'State inconsistency. Trying to do things after time is up but the state is not \'' + EXPLANATION + '\' but \'' + this.state + '\'');
 
         this.emit(TURN_TIME_IS_UP, this);
-
         this.state = READY_FOR_EXPLANATION;
         this.nextTurn();
     }
@@ -216,10 +211,22 @@ class Game extends EventEmitter {
         this.currentTeamIndex = this.currentTeamIndex + 1 >= this.teams.length ? 0 : this.currentTeamIndex + 1;
     }
 
+    startTurnTimer() {
+        const self = this;
+        let turnEndsAt = new Date();
+        turnEndsAt.setSeconds(turnEndsAt.getSeconds() + this.settings.turnDurationInSeconds);
+
+        this.turnTimer = new Timer(turnEndsAt);
+        this.turnTimer.start();
+        this.turnTimer.on('time_is_up', function () {
+            self.timeIsUp();
+        });
+    }
+
     stopTimer() {
-        if (this.turnTimerId) {
-            clearTimeout(this.turnTimerId);
-            this.turnTimerId = null;
+        if (this.turnTimer) {
+            this.turnTimer.stop();
+            this.turnTimer = null;
         }
     }
 
@@ -229,7 +236,7 @@ class Game extends EventEmitter {
         }
 
         if (states.indexOf(this.state) === -1) {
-            throw new Error(errorMessage ? errorMessage : 'State expected: \'' + state + '\'');
+            throw new Error(errorMessage ? errorMessage : 'State expected: \'' + states + '\'');
         }
     }
 
