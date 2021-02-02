@@ -18,6 +18,23 @@
         </template>
       </template>
 
+      <template v-if="game.state === 'explanation'">
+        <p>Ends: {{ game.explanationEndsAt.toISOString() }}</p>
+        <p>Time left: <span>{{ timeForExplanationLeft }}</span></p>
+        <template v-if="isPlayerInCurrentTeam">
+          <template v-if="currentPlayer.id === currentTeam.explainer.id">
+            <h3>{{ currentWordForExplanation }}</h3>
+            <button>Explained</button>
+          </template>
+          <template v-else>
+            <p>Now <span>{{ currentTeam.explainer.name }}</span> is explaining you</p>
+          </template>
+        </template>
+        <template v-else>
+          <p>Now <span>{{ currentExplainer.name }}</span> is explaining to <span v-for="(member, index) in currentGuessers" v-bind:key="index">{{ member.name }}</span></p>
+        </template>
+      </template>
+
       <hr>
       <div class="score-table">
         <table>
@@ -43,14 +60,22 @@
 </template>
 
 <script>
+const Timer = require('../services/Timer.js');
+
 export default {
   name: 'Game',
+  mounted() {
+    this.initTimer();
+    this.initSocket();
+  },
   props: {
     msg: String
   },
   data() {
+    let explanationEndsAt = new Date();
+    explanationEndsAt.setSeconds(explanationEndsAt.getSeconds() + 10);
     return {
-      currentPlayer: {"id": 1, "name": "Test 1"},
+      currentPlayer: {"id": 4, "name": "Test 4"},
       game: {
         "title": "test game",
         "players": [
@@ -79,11 +104,14 @@ export default {
             "score": [2, 0, 0]
           }
         ],
-        "state": "in_progress",
+        "state": "explanation",
         "currentTeamIndex": 1,
         "currentRoundIndex": 1,
-        "roundWords": ["sun", "dog"]
-      }
+        "roundWords": ["sun", "dog"],
+        explanationEndsAt: explanationEndsAt
+      },
+      timeForExplanationLeft: 30,
+      timer: null
     }
   },
   computed: {
@@ -98,6 +126,29 @@ export default {
     },
     currentGuessers() {
       return this.currentTeam.members.filter(member => member.id !== this.currentExplainer.id);
+    },
+    currentWordForExplanation() {
+      return this.game.roundWords[0];
+    }
+  },
+  methods: {
+    initTimer() {
+      let self = this;
+      this.timer = new Timer(this.game.explanationEndsAt);
+      this.timer.on('time_is_up', function(timer) {
+        timer.stop();
+      });
+      this.timer.on('tick', function() {
+        self.updateTimeForExplanationLeft();
+      });
+      this.timer.start();
+    },
+    updateTimeForExplanationLeft() {
+      this.timeForExplanationLeft = Math.max(this.game.explanationEndsAt.getSeconds() - new Date().getSeconds(), 0)
+    },
+    initSocket() {
+      //this.socket = new WebSocket();
+      //this.socket.onmessage()
     }
   }
 }

@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const Timer = require('./Timer');
+const Timer = require('../../frontend/src/services/Timer');
 
 // states
 const INITIALIZATION = 'initialization';
