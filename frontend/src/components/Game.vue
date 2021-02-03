@@ -2,6 +2,7 @@
   <div id="game">
     <div class="inner">
       <h1>{{ game.title }}</h1>
+      <h3>Current player: {{currentPlayer.name}}</h3>
 
       <template v-if="game.state === 'in_progress'">
         <template v-if="isPlayerInCurrentTeam">
@@ -19,12 +20,11 @@
       </template>
 
       <template v-if="game.state === 'explanation'">
-        <p>Ends: {{ game.explanationEndsAt.toISOString() }}</p>
         <p>Time left: <span>{{ timeForExplanationLeft }}</span></p>
         <template v-if="isPlayerInCurrentTeam">
           <template v-if="currentPlayer.id === currentTeam.explainer.id">
             <h3>{{ currentWordForExplanation }}</h3>
-            <button>Explained</button>
+            <button v-on:click="onWordExplained">Explained</button>
           </template>
           <template v-else>
             <p>Now <span>{{ currentTeam.explainer.name }}</span> is explaining you</p>
@@ -36,40 +36,25 @@
       </template>
 
       <hr>
-      <div class="score-table">
-        <table>
-          <tr>
-            <th>Team</th>
-            <th v-for="i in game.settings.roundsCount" v-bind:key="i">Round {{ i }}</th>
-            <th>Total</th>
-          </tr>
-          <tr v-for="(team, index) in game.teams" v-bind:key="index">
-            <td>
-              <span v-for="(member, index) in team.members" v-bind:key="index">{{ member.name }}</span>
-            </td>
-            <td v-for="(roundScore, index) in team.score" v-bind:key="index">
-              <span>{{ roundScore }}</span>
-            </td>
-            <td>{{ team.score.reduce((totalScore, score) => totalScore + score, 0) }}</td>
-          </tr>
-        </table>
-      </div>
-    </div>
 
+      <score-table :game="game"></score-table>
+
+    </div>
   </div>
 </template>
 
 <script>
+import ScoreTable from './ScoreTable.vue';
 const Timer = require('../services/Timer.js');
 
 export default {
-  name: 'Game',
+  name: 'game',
   mounted() {
     this.initTimer();
     this.initSocket();
   },
-  props: {
-    msg: String
+  components: {
+    ScoreTable: ScoreTable
   },
   data() {
     let explanationEndsAt = new Date();
@@ -132,6 +117,11 @@ export default {
     }
   },
   methods: {
+    onWordExplained() {
+      let playerIndex = Math.floor(Math.random() * this.game.players.length);
+      this.currentPlayer = this.game.players[playerIndex];
+      this.game.teams[0].score.splice(0, 1, 3);
+    },
     initTimer() {
       let self = this;
       this.timer = new Timer(this.game.explanationEndsAt);
@@ -163,6 +153,7 @@ export default {
   padding: 20px;
   border-radius: 25px;
 }
+
 .score-table {
   display: inline-block;
 }
