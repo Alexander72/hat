@@ -114,6 +114,7 @@ class Game extends EventEmitter {
         this.stopTimer();
         this.rewindNextExplainerInTheTeam(this.getCurrentTeam());
         this.rewindNextTeam();
+        this.shuffleRoundWords();
         this.emit(NEXT_TURN_REWINDED, this);
     }
 
@@ -175,6 +176,10 @@ class Game extends EventEmitter {
 
     resetWordsForNewRound() {
         this.roundWords = [...this.words];
+        this.shuffleRoundWords();
+    }
+
+    shuffleRoundWords() {
         this.roundWords.sort(() => Math.random() - 0.5);
     }
 
