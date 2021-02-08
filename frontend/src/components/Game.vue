@@ -44,6 +44,7 @@
 </template>
 
 <script>
+import WebSocketService from '../services/WebSocketService';
 import ScoreTable from './ScoreTable.vue';
 const Timer = require('../services/Timer.js');
 
@@ -51,7 +52,11 @@ export default {
   name: 'game',
   mounted() {
     this.initTimer();
-    this.initSocket();
+    this.webSocketService = new WebSocketService();
+    this.webSocketService.connect('ws://localhost:3000/ws/game/cfohxi4z25');
+  },
+  destroyed() {
+    this.webSocketService.close();
   },
   components: {
     ScoreTable: ScoreTable
@@ -118,9 +123,10 @@ export default {
   },
   methods: {
     onWordExplained() {
-      let playerIndex = Math.floor(Math.random() * this.game.players.length);
-      this.currentPlayer = this.game.players[playerIndex];
-      this.game.teams[0].score.splice(0, 1, 3);
+      //let playerIndex = Math.floor(Math.random() * this.game.players.length);
+      //this.currentPlayer = this.game.players[playerIndex];
+      //this.game.teams[0].score.splice(0, 1, 3);
+      this.webSocketService.send({type:"get_game"})
     },
     initTimer() {
       let self = this;

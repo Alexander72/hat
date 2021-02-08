@@ -3,20 +3,22 @@ class WebSocketService {
     scheme;
     port;
     connectionUrl;
+    reconnectAttempt = 0;
+    isTryingToReconnect = false;
+    messagesQueue = [];
 
     send(message) {
         console.log('WebSocketService: sending message: ');
         console.log(message);
-        this.socket.send(JSON.stringify(message));
+        if (this.socket.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify(message));
+        } else {
+            console.log('WebSocketService: sending message is not possible due to socket status: ' + this.socket.readyState + '. Storing message in the queue for the future sending.');
+            this.messagesQueue.push(message);
+        }
     }
 
     connect(connectionUrl) {
-        const self = this;
-        const reconnectFunction = function (event) {
-            self.logSocketStatus(event);
-            self.reconnect();
-        };
-
         this.connectionUrl = connectionUrl ? connectionUrl : this.getDefaultConnectionUrl();
         console.log('WebSocketService: Opening WS connection to ' + this.connectionUrl);
 
@@ -25,12 +27,28 @@ class WebSocketService {
             return;
         }
 
+        const self = this;
         this.socket = new WebSocket(this.connectionUrl);
-
-        this.socket.onopen = this.logSocketStatus;
-        this.socket.onclose = reconnectFunction;
-        this.socket.onerror = reconnectFunction
-
+        this.socket.onopen = function (event) {
+            self.logSocketStatus(event);
+            self.reconnectAttempt = 0;
+            console.log("WebSocketService: socket opened successfully! Trying to resend queued messages.");
+            setTimeout(function () {
+                while (self.messagesQueue.length) {
+                    self.send(self.messagesQueue.shift());
+                }
+            }, 10);
+        };
+        this.socket.onclose = function (event) {
+            console.log("WebSocketService: onclose handler triggered");
+            self.logSocketStatus(event);
+            self.reconnect();
+        };
+        this.socket.onerror = function (event) {
+            console.log("WebSocketService: onerror handler triggered");
+            self.logSocketStatus(event);
+            self.reconnect();
+        };
         this.socket.onmessage = function (event) {
             console.log('WebSocketService: Received message: ');
             console.log(event);
@@ -41,12 +59,35 @@ class WebSocketService {
         console.info("WebSocketService: Closing connection");
         if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
             console.error("WebSocketService: Socket not connected, unable to close!");
+            return;
         }
         this.socket.close(1000, "Closing from client");
         console.info("WebSocketService: Connection closed");
     }
 
     reconnect() {
+        if (this.isTryingToReconnect) {
+            console.log('WebSocketService: already trying to reconnect, wait for reconnect finishes');
+            return;
+        }
+
+        this.isTryingToReconnect = true;
+
+        if (this.reconnectAttempt >= 10) {
+            console.error('WebSocketService: reconnect attempt limit has been reached')
+            return;
+        }
+        this.reconnectAttempt++;
+        console.log('WebSocketService: reconnect attempt: ' + this.reconnectAttempt);
+
+        let self = this;
+        setTimeout(function () {
+            self.doReconnect();
+            self.isTryingToReconnect = false;
+        }, 100);
+    }
+
+    doReconnect() {
         console.log('WebSocketService: Trying to reconnect');
         this.close();
         this.connect();
@@ -66,8 +107,7 @@ class WebSocketService {
         return this.connectionUrl;
     }
 
-    logSocketStatus(event) {
-        console.log(event);
+    logSocketStatus() {
         if (!this.socket) {
             console.log('WebSocketService: Socket is not initialized');
         } else {
