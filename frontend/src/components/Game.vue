@@ -9,7 +9,7 @@
           <button v-on:click="editCurrentPlayerName">ok</button>
         </template>
 
-        <template v-else-if="didPlayerFillAllWords(currentPlayer.id)">
+        <template v-else-if="!didPlayerFillAllWords(currentPlayer.id)">
           <h3>Add words:</h3>
           <div v-for="index in game.settings.wordsPerPlayer" v-bind:key="index">
             <label>{{index}}) <input v-model="game.playersWords[currentPlayer.id][index - 1]"/></label>
@@ -117,10 +117,10 @@ export default {
           1: ["cow"],
           2: ["dog"],
           3: ["sun"],
-          4: ["rat","rat"],
+          4: ["rat"],
         },
         words: ["cow", "dog", "sun", "rat"],
-        settings: {"playersCount": 4, "wordsPerPlayer": 2, "roundsCount": 3, "turnDurationInMilliseconds": 500},
+        settings: {"playersCount": 4, "wordsPerPlayer": 1, "roundsCount": 3, "turnDurationInMilliseconds": 500},
         teams: [
           {
             members: [
@@ -139,7 +139,7 @@ export default {
             score: [2, 0, 0]
           }
         ],
-        state: "initialization",
+        state: "explanation",
         currentTeamIndex: 1,
         currentRoundIndex: 1,
         roundWords: ["sun", "dog"],
