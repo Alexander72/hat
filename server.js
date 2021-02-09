@@ -60,9 +60,8 @@ app.ws('/ws/game/:gameId', (ws, req) => {
 			playerMessageHandler.disconnect();
 		})
 	} catch (e) {
-		ws.on('message', msg => {
-			ws.send(e.toString());
-		});
+		console.log(new Date() + 'ws request processed unsuccessfully: ' + e.toString() + e.stack);
+		ws.send(e.toString());
 	}
 })
 
